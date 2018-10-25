@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -14,7 +14,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class MySQL {
 
-	final IslandRate plugin;
+	final IslandRateAddon plugin;
 	private Connection connection;
 	private String host, port, database, username, password, storageType;
 
@@ -22,11 +22,11 @@ public class MySQL {
 
 	public static MySQL getInstance() {
 		if (instance == null)
-			new MySQL(IslandRate.getPlugin());
+			new MySQL(IslandRateAddon.getPlugin());
 		return instance;
 	}
 
-	protected MySQL(IslandRate plugin) {
+	protected MySQL(IslandRateAddon plugin) {
 		this.plugin = plugin;
 		instance = this;
 		storageType = getConfig().getString("storage.type", "SQLITE");

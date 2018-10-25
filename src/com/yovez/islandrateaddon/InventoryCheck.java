@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,9 +11,9 @@ import org.bukkit.inventory.ItemStack;
 
 public class InventoryCheck implements Runnable {
 
-	IslandRate plugin;
+	IslandRateAddon plugin;
 
-	public InventoryCheck(IslandRate plugin) {
+	public InventoryCheck(IslandRateAddon plugin) {
 		this.plugin = plugin;
 	}
 

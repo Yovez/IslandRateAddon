@@ -1,7 +1,7 @@
 change-rating: true
 disable-command-rating: false
 max-command-rating: 5
-min-island-level: 0
+# min-island-level: 0
 send-owner-message: false
 cooldown: 60
 placeholderapi_shortened: false

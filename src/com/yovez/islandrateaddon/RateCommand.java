@@ -1,44 +1,42 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.sql.SQLException;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import com.wasteofplastic.askyblock.Island;
+import world.bentobox.bentobox.api.commands.CompositeCommand;
+import world.bentobox.bentobox.database.objects.Island;
 
-public class RateCommand implements CommandExecutor {
+public class RateCommand extends CompositeCommand {
 
-	final IslandRate plugin;
+	final IslandRateAddon addon;
 	String prefix;
 	boolean menu;
 	boolean topMenu;
 	boolean disableCommand;
 
-	public RateCommand(IslandRate plugin) {
-		this.plugin = plugin;
-		setupPrefix();
+	public RateCommand(IslandRateAddon addon) {
+		super(addon, "rate");
 	}
 
 	private void setupPrefix() {
-		prefix = ChatColor.translateAlternateColorCodes('&', plugin.getMessages().getConfig().getString("prefix"));
-		menu = plugin.getConfig().getBoolean("menu.enabled", false);
-		topMenu = plugin.getConfig().getBoolean("top_menu.enabled", false);
-		disableCommand = plugin.getConfig().getBoolean("disable-command-rating", false);
+		prefix = ChatColor.translateAlternateColorCodes('&', addon.getMessages().getConfig().getString("prefix"));
+		menu = addon.getConfig().getBoolean("menu.enabled", false);
+		topMenu = addon.getConfig().getBoolean("top_menu.enabled", false);
+		disableCommand = addon.getConfig().getBoolean("disable-command-rating", false);
 	}
 
 	private String getMessage(String path, Player p, OfflinePlayer t, int rating, int topPlace) {
-		return plugin.getMessage(path, p, t, rating, topPlace);
+		return addon.getMessage(path, p, t, rating, topPlace);
 	}
 
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
-		if (cmd.getName().equalsIgnoreCase("rate")) {
+	public boolean execute(CommandSender sender, String cmd, String[] args) {
+		if (cmd.equalsIgnoreCase("rate")) {
 			if (!(sender instanceof Player)) {
 				if (args.length == 0) {
 					sender.sendMessage("IslandRate console commands:");
@@ -91,27 +89,26 @@ public class RateCommand implements CommandExecutor {
 			}
 			if (args.length == 0) {
 				if (menu) {
-					if (!p.getLocation().getWorld().getName()
-							.equals(plugin.getAskyblock().getIslandWorld().getName())) {
+					if (!p.getLocation().getWorld().getName().equals(addon.getSkyblockWorld())) {
 						p.sendMessage(noIsland);
 						return true;
 					}
-					if (plugin.getAskyblock().getOwner(p.getLocation()) == null) {
+					if (addon.getAskyblock().getOwner(p.getLocation()) == null) {
 						p.sendMessage(noIsland);
 						return true;
 					}
-					if (plugin.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
-						if (plugin.getConfig().getBoolean("island_menu.enabled", false) == true) {
-							IslandMenu im = new IslandMenu(plugin, p);
+					if (addon.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
+						if (addon.getConfig().getBoolean("island_menu.enabled", false) == true) {
+							IslandMenu im = new IslandMenu(addon, p);
 							im.openInv();
 						} else {
 							p.sendMessage(ownedIsland);
 						}
 						return true;
 					}
-					RateMenu rm = new RateMenu(plugin,
-							Bukkit.getOfflinePlayer(plugin.getAskyblock().getIslandAt(p.getLocation()).getOwner()));
-					if (plugin.getConfig().getBoolean("menu.custom", false) == false)
+					RateMenu rm = new RateMenu(addon,
+							Bukkit.getOfflinePlayer(addon.getAskyblock().getIslandAt(p.getLocation()).getOwner()));
+					if (addon.getConfig().getBoolean("menu.custom", false) == false)
 						rm.openInv(p);
 					else
 						rm.openCustomInv(p);
@@ -126,7 +123,7 @@ public class RateCommand implements CommandExecutor {
 						p.sendMessage(noPermission);
 						return true;
 					}
-					InventoryCheck ic = new InventoryCheck(plugin);
+					InventoryCheck ic = new InventoryCheck(addon);
 					p.sendMessage("§aSuccessfully ran an inv check on all online players...");
 					p.sendMessage("§bNumber of Players caught: §e" + ic.runCheck().keySet().size());
 					p.sendMessage("§bNumber of Items removed: §e" + ic.runCheck().values().size());
@@ -154,7 +151,7 @@ public class RateCommand implements CommandExecutor {
 						return true;
 					}
 					try {
-						plugin.getMySQL().convertFromFile();
+						addon.getMySQL().convertFromFile();
 						p.sendMessage("§aMigrated from file storage to MySQL/SQLite storage successfully!");
 					} catch (SQLException | ClassNotFoundException e) {
 						e.printStackTrace();
@@ -168,12 +165,12 @@ public class RateCommand implements CommandExecutor {
 						p.sendMessage(noPermission);
 						return true;
 					}
-					plugin.reloadConfig();
-					plugin.getMessages().reloadConfig();
-					plugin.getOptOut().reloadConfig();
+					addon.reloadConfig();
+					addon.getMessages().reloadConfig();
+					addon.getOptOut().reloadConfig();
 					setupPrefix();
 					p.sendMessage("§aSuccessfully Reloaded IslandRate Configs!");
-					plugin.getMySQL();
+					addon.getMySQL();
 					return true;
 				}
 				/*
@@ -194,7 +191,7 @@ public class RateCommand implements CommandExecutor {
 				 * p.sendMessage("§cCorrect usage is /rate set <player> <# of stars>"); return
 				 * true; } if (args[0].equalsIgnoreCase("inftop")) { if
 				 * (!p.hasPermission("islandrate.infinitetop")) { p.sendMessage(noPermission);
-				 * return true; } InfiniteTopMenu itm = new InfiniteTopMenu(plugin);
+				 * return true; } InfiniteTopMenu itm = new InfiniteTopMenu(addon);
 				 * itm.openInv(p); return true; }
 				 */
 				if (args[0].equalsIgnoreCase("top")) {
@@ -202,21 +199,21 @@ public class RateCommand implements CommandExecutor {
 						p.sendMessage(noPermission);
 						return true;
 					}
-					if (plugin.getAPI().getTopRated() == null) {
+					if (addon.getAPI().getTopRated() == null) {
 						p.sendMessage(topNoTop);
 						return true;
 					}
 					if (topMenu) {
-						TopMenu tm = new TopMenu(plugin);
+						TopMenu tm = new TopMenu(addon);
 						tm.openInv(p);
 						return true;
 					}
 					p.sendMessage(topHeader);
 					for (int i = 1; i < 11; i++) {
-						if (plugin.getAPI().getTotalRatings(plugin.getAPI().getTopRated(i)) == 0)
+						if (addon.getAPI().getTotalRatings(addon.getAPI().getTopRated(i)) == 0)
 							break;
-						p.sendMessage(getMessage("top.entry", null, plugin.getAPI().getTopRated(i),
-								plugin.getAPI().getTotalRatings(plugin.getAPI().getTopRated(i)), i));
+						p.sendMessage(getMessage("top.entry", null, addon.getAPI().getTopRated(i),
+								addon.getAPI().getTotalRatings(addon.getAPI().getTopRated(i)), i));
 					}
 					p.sendMessage(topFooter);
 					return true;
@@ -225,19 +222,19 @@ public class RateCommand implements CommandExecutor {
 					p.sendMessage(commandDisabled);
 					return true;
 				}
-				if (!p.getLocation().getWorld().getName().equals(plugin.getAskyblock().getIslandWorld().getName())) {
+				if (addon.getIslands().userIsOnIsland(addon.getSkyblockWorld(), p.getUniqueId())) {
 					p.sendMessage(noIsland);
 					return true;
 				}
-				if (plugin.getAskyblock().getOwner(p.getLocation()) == null) {
+				if (addon.getIslands().hasIsland(getWorld(), uuid) == null) {
 					p.sendMessage(noIsland);
 					return true;
 				}
-				if (plugin.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
+				if (addon.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
 					p.sendMessage(ownedIsland);
 					return true;
 				}
-				Island island = plugin.getAskyblock().getIslandAt(p.getLocation());
+				Island island = addon.getAskyblock().getIslandAt(p.getLocation());
 				if (island == null) {
 					p.sendMessage(noIsland);
 					return true;
@@ -246,16 +243,16 @@ public class RateCommand implements CommandExecutor {
 					p.sendMessage(teamIsland);
 					return true;
 				}
-				if (!plugin.getAPI().isInt(args[0])) {
+				if (!addon.getAPI().isInt(args[0])) {
 					p.sendMessage(numberNotFound);
 					return true;
 				}
 				if (Integer.parseInt(args[0]) <= 0
-						|| Integer.parseInt(args[0]) > plugin.getConfig().getInt("max-command-rating", 5)) {
+						|| Integer.parseInt(args[0]) > addon.getConfig().getInt("max-command-rating", 5)) {
 					p.sendMessage(commandUsage);
 					return true;
 				}
-				plugin.rateIsland(p, Bukkit.getOfflinePlayer(island.getOwner()), Integer.parseInt(args[0]));
+				addon.rateIsland(p, Bukkit.getOfflinePlayer(island.getOwner()), Integer.parseInt(args[0]));
 			} else if (args.length == 2) {
 				if (args[0].equalsIgnoreCase("average")) {
 					if (!p.hasPermission("islandrate.average")) {
@@ -322,6 +319,12 @@ public class RateCommand implements CommandExecutor {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public void setup() {
+		// TODO Auto-generated method stub
+
 	}
 
 }

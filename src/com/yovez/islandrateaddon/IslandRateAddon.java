@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,48 +16,50 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.plugin.java.JavaPlugin;
 
-import com.wasteofplastic.askyblock.ASkyBlockAPI;
-import com.wasteofplastic.askyblock.Island;
+import world.bentobox.bentobox.api.addons.Addon;
+import world.bentobox.bentobox.database.objects.Island;
+import world.bentobox.bskyblock.BSkyBlock;
 
-public class IslandRate extends JavaPlugin {
+public class IslandRateAddon extends Addon {
 
 	private MySQL mysql;
-	private ASkyBlockAPI askyblock;
 	private IslandRateAPI api;
 	private Map<UUID, Long> cooldown;
 	private CustomConfig messages, optOut;
-	public static IslandRate plugin;
+	private World skyblockWorld;
+	public static IslandRateAddon addon;
 
 	@Override
 	public void onEnable() {
-		plugin = this;
+		addon = this;
 		saveDefaultConfig();
 		messages = new CustomConfig(this, "messages");
 		messages.saveDefaultConfig();
 		optOut = new CustomConfig(this, "opt-out");
 		optOut.saveDefaultConfig();
-		askyblock = ASkyBlockAPI.getInstance();
 		api = IslandRateAPI.getInstance();
 		mysql = MySQL.getInstance();
-		getCommand("rate").setExecutor(new RateCommand(this));
-		if (Bukkit.getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
+		setSkyblockWorld(getServer().getWorld(BSkyBlock.getInstance().getConfig().getString("world-name")));
+		new RateCommand(this);
+		if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			new Placeholders(this);
 		}
-		Bukkit.getServer().getPluginManager().registerEvents(new EventListener(this), this);
-		if (plugin.getConfig().getInt("cooldown", 60) > 0)
+		getServer().getPluginManager().registerEvents(new EventListener(addon),
+				getServer().getPluginManager().getPlugin("BentoBox"));
+		if (addon.getConfig().getInt("cooldown", 60) > 0)
 			cooldown = new HashMap<UUID, Long>();
 		if (getConfig().getBoolean("inv_check.enabled", false) == true)
-			Bukkit.getScheduler().scheduleSyncRepeatingTask(this, new InventoryCheck(this), 0L,
+			Bukkit.getScheduler().scheduleSyncRepeatingTask(getPlugin(), new InventoryCheck(this), 0L,
 					getConfig().getLong("inv_check.timer") * 1000);
 	}
 
-	public static IslandRate getPlugin() {
-		return plugin;
+	public static IslandRateAddon getAddon() {
+		return addon;
 	}
 
 	@Override
@@ -94,8 +96,7 @@ public class IslandRate extends JavaPlugin {
 								- TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
 			if (msg.contains("%opted-out-player%"))
 				msg = msg.replaceAll("%opted-out-player%",
-						plugin.getOptOut().getConfig().getBoolean(p.getUniqueId().toString(), false) ? "True"
-								: "False");
+						addon.getOptOut().getConfig().getBoolean(p.getUniqueId().toString(), false) ? "True" : "False");
 		}
 		if (t != null) {
 			if (msg.contains("%target%"))
@@ -112,8 +113,7 @@ public class IslandRate extends JavaPlugin {
 								- TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())));
 			if (msg.contains("%opted-out-target%"))
 				msg = msg.replaceAll("%opted-out-target%",
-						plugin.getOptOut().getConfig().getBoolean(t.getUniqueId().toString(), false) ? "True"
-								: "False");
+						addon.getOptOut().getConfig().getBoolean(t.getUniqueId().toString(), false) ? "True" : "False");
 		}
 		if (rating > 0)
 			msg = msg.replaceAll("%rating%", String.valueOf(rating));
@@ -162,27 +162,25 @@ public class IslandRate extends JavaPlugin {
 					"§2[IslandRate] §4WARNING: §cAn error occured! Please tell the developer about this error! (R393)");
 			return;
 		}
-		if (getConfig().getLong("min-island-level", 0) > 0) {
-			if (askyblock.hasIsland(p.getUniqueId())) {
-				if (askyblock.getLongIslandLevel(p.getUniqueId()) < getConfig().getLong("min-island-level", 0)) {
-					p.sendMessage(getMessage("incorrect-level", p, null, 0, 0));
-					p.playSound(p.getLocation(),
-							Sound.valueOf(Bukkit.getVersion().contains("1.7") || Bukkit.getVersion().contains("1.8")
-									? "ANVIL_BREAK"
-									: "BLOCK_ANVIL_BREAK"),
-							100, 100);
-					return;
-				}
-				p.sendMessage(getMessage("incorrect-level", p, null, 0, 0));
-				p.playSound(p.getLocation(),
-						Sound.valueOf(Bukkit.getVersion().contains("1.7") || Bukkit.getVersion().contains("1.8")
-								? "ANVIL_BREAK"
-								: "BLOCK_ANVIL_BREAK"),
-						100, 100);
-				return;
-			}
-		}
-		Island island = getAskyblock().getIslandOwnedBy(op.getUniqueId());
+		/*
+		 * if (getConfig().getLong("min-island-level", 0) > 0) { if
+		 * (getIslands().hasIsland(skyblockWorld, p.getUniqueId())) {
+		 * 
+		 * if (getIslands().getIsland(skyblockWorld, p.getUniqueId()) <
+		 * getConfig().getLong("min-island-level", 0)) {
+		 * p.sendMessage(getMessage("incorrect-level", p, null, 0, 0));
+		 * p.playSound(p.getLocation(),
+		 * Sound.valueOf(Bukkit.getVersion().contains("1.7") ||
+		 * Bukkit.getVersion().contains("1.8") ? "ANVIL_BREAK" : "BLOCK_ANVIL_BREAK"),
+		 * 100, 100); return; } p.sendMessage(getMessage("incorrect-level", p, null, 0,
+		 * 0)); p.playSound(p.getLocation(),
+		 * Sound.valueOf(Bukkit.getVersion().contains("1.7") ||
+		 * Bukkit.getVersion().contains("1.8") ? "ANVIL_BREAK" : "BLOCK_ANVIL_BREAK"),
+		 * 100, 100); return;
+		 * 
+		 * } }
+		 */
+		Island island = getIslands().getIsland(skyblockWorld, op.getUniqueId());
 		if (island == null) {
 			p.sendMessage(getMessage("no-island", p, null, 0, 0));
 			p.playSound(p.getLocation(),
@@ -328,10 +326,6 @@ public class IslandRate extends JavaPlugin {
 						+ op.getName() + "'s Island " + rating + ".");
 	}
 
-	public ASkyBlockAPI getAskyblock() {
-		return askyblock;
-	}
-
 	public MySQL getMySQL() {
 		return mysql;
 	}
@@ -346,5 +340,13 @@ public class IslandRate extends JavaPlugin {
 
 	public CustomConfig getOptOut() {
 		return optOut;
+	}
+
+	public World getSkyblockWorld() {
+		return skyblockWorld;
+	}
+
+	public void setSkyblockWorld(World skyblockWorld) {
+		this.skyblockWorld = skyblockWorld;
 	}
 }

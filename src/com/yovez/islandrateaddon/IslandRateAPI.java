@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,13 +15,13 @@ public class IslandRateAPI {
 
 	public static IslandRateAPI getInstance() {
 		if (instance == null)
-			new IslandRateAPI(IslandRate.getPlugin());
+			new IslandRateAPI(IslandRateAddon.getPlugin());
 		return instance;
 	}
 
-	private IslandRate plugin;
+	private IslandRateAddon plugin;
 
-	protected IslandRateAPI(IslandRate plugin) {
+	protected IslandRateAPI(IslandRateAddon plugin) {
 		this.plugin = plugin;
 		instance = this;
 	}

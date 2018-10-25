@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import org.bukkit.entity.Player;
 
@@ -7,9 +7,9 @@ import me.clip.placeholderapi.PlaceholderHook;
 
 public class Placeholders extends PlaceholderHook {
 
-	IslandRate plugin;
+	IslandRateAddon plugin;
 
-	public Placeholders(IslandRate plugin) {
+	public Placeholders(IslandRateAddon plugin) {
 		this.plugin = plugin;
 		if (plugin.getConfig().getBoolean("placeholderapi_shortened", false) == true)
 			PlaceholderAPI.registerPlaceholderHook("ir", this);

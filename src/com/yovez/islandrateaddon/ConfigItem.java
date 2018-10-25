@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,10 +8,10 @@ import org.bukkit.inventory.ItemStack;
 
 public class ConfigItem {
 
-	final IslandRate plugin;
+	final IslandRateAddon plugin;
 	private Map<ItemStack, Integer> items;
 
-	public ConfigItem(IslandRate plugin, OfflinePlayer p) {
+	public ConfigItem(IslandRateAddon plugin, OfflinePlayer p) {
 		this.plugin = plugin;
 		if (items == null || items.isEmpty())
 			setupItems(p);

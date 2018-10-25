@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,11 +15,11 @@ import net.md_5.bungee.api.ChatColor;
 
 public class TopMenu {
 
-	final IslandRate plugin;
+	final IslandRateAddon plugin;
 	private Inventory inv;
 	private List<ItemStack> items;
 
-	public TopMenu(IslandRate plugin) {
+	public TopMenu(IslandRateAddon plugin) {
 		this.plugin = plugin;
 		inv = Bukkit.createInventory(null, 27, getTitle());
 		items = new ArrayList<ItemStack>();

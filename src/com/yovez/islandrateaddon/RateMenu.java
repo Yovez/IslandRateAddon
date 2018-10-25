@@ -1,11 +1,12 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -14,26 +15,26 @@ import org.bukkit.inventory.meta.SkullMeta;
 
 import net.md_5.bungee.api.ChatColor;
 
-public class IslandMenu {
+public class RateMenu {
 
-	final IslandRate plugin;
+	final IslandRateAddon plugin;
 	private Inventory inv;
-	private Player player;
-	private Map<ItemStack, Integer> items;
+	private OfflinePlayer player;
+	private List<ItemStack> items;
 
-	public IslandMenu(IslandRate plugin) {
+	public RateMenu(IslandRateAddon plugin) {
 		this.plugin = plugin;
 	}
 
-	public IslandMenu(IslandRate plugin, Player player) {
+	public RateMenu(IslandRateAddon plugin, OfflinePlayer player) {
 		this.plugin = plugin;
 		this.player = player;
-		inv = Bukkit.createInventory(player, 9, getTitle());
-		items = new HashMap<ItemStack, Integer>();
+		inv = Bukkit.createInventory(null, 9, getTitle());
+		items = new ArrayList<ItemStack>();
 	}
 
 	private String getTitle() {
-		return ChatColor.translateAlternateColorCodes('&', plugin.getMessage("island_menu.title", player, null, 0, 0));
+		return ChatColor.translateAlternateColorCodes('&', plugin.getMessage("menu.title", null, player, 0, 0));
 	}
 
 	@SuppressWarnings("deprecation")
@@ -47,62 +48,63 @@ public class IslandMenu {
 			meta.setOwningPlayer(player);
 		meta.setLore(Arrays.asList("§6Total Ratings: §e" + plugin.getAPI().getTotalRatings(player)));
 		item.setItemMeta(meta);
-		if (!items.containsKey(item))
-			items.put(item, plugin.getConfig().getInt("island_menu.items.skull.slot"));
+		if (!items.contains(item))
+			items.add(item);
 		return item;
 	}
 
-	public ItemStack getOptOut() {
-		ItemStack item = new ItemStack(Material.BARRIER);
+	public ItemStack getHelp() {
+		ItemStack item = new ItemStack(Material.BOOK);
 		ItemMeta meta = item.getItemMeta();
-		meta.setDisplayName("§bToggle Opted-Out");
-		meta.setLore(Arrays.asList("§6Opted-Out: §r"
-				+ (plugin.getOptOut().getConfig().getBoolean(player.getUniqueId().toString(), false) ? "§aTrue"
-						: "§cFalse")));
+		meta.setDisplayName("§2Rating Info");
+		meta.setLore(Arrays.asList("§aRate the island.", "§aChoose your rating 1-5."));
 		item.setItemMeta(meta);
-		if (!items.containsKey(item))
-			items.put(item, 2);
+		if (!items.contains(item))
+			items.add(item);
 		return item;
 	}
 
-	public void openInv() {
-		player.openInventory(createInv());
+	public ItemStack getStar(int stars) {
+		ItemStack item = new ItemStack(Material.EMERALD, stars);
+		ItemMeta meta = item.getItemMeta();
+		meta.setDisplayName(plugin.getMessage("ratings." + stars + "-star", null,
+				Bukkit.getServer().getOfflinePlayer(player.getUniqueId()), 0, 0));
+		item.setItemMeta(meta);
+		if (!items.contains(item))
+			items.add(item);
+		return item;
 	}
 
-	public void openCustomInv() {
-		player.openInventory(createCustomInv());
+	public void openInv(Player p) {
+		p.openInventory(createInv(p));
+	}
+
+	public void openCustomInv(Player p) {
+		p.openInventory(createCustomInv(p));
 	}
 
 	public void populateItems() {
-		if (plugin.getConfig().getBoolean("island_menu.custom", false) == false) {
+		if (plugin.getConfig().getBoolean("menu.custom", false) == false) {
 			getSkull();
-			getOptOut();
+			getHelp();
+			for (int i = 1; i < 6; i++)
+				getStar(i);
 		} else {
-			setupItems();
+
 		}
 	}
 
-	public void setupItems() {
-		items = new HashMap<ItemStack, Integer>();
-		for (String s : plugin.getConfig().getConfigurationSection("island_menu.items").getKeys(false)) {
-			s = "island_menu.items." + s;
-			if (s.equalsIgnoreCase("island_menu.items.skull"))
-				continue;
-			if (plugin.getConfigItem(s, player) != null)
-				if (!items.containsKey(plugin.getConfigItem(s, player)))
-					items.put(plugin.getConfigItem(s, player), plugin.getConfig().getInt(s + ".slot"));
-		}
-	}
-
-	public Inventory createInv() {
+	public Inventory createInv(Player p) {
+		inv = Bukkit.createInventory(p, 9, getTitle());
+		int place[] = { 0, 2, 4, 5, 6, 7, 8 };
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
 			@Override
 			public void run() {
 				if (items == null || items.isEmpty())
 					populateItems();
-				for (ItemStack item : items.keySet()) {
-					inv.setItem(items.get(item), item);
+				for (int i = 0; i < items.size(); i++) {
+					inv.setItem(place[i], items.get(i));
 				}
 			}
 
@@ -111,17 +113,17 @@ public class IslandMenu {
 	}
 
 	@SuppressWarnings("deprecation")
-	public Inventory createCustomInv() {
-		inv = Bukkit.createInventory(player, plugin.getConfig().getInt("island_menu.size", 9), getTitle());
+	public Inventory createCustomInv(Player p) {
+		inv = Bukkit.createInventory(p, plugin.getConfig().getInt("menu.size", 9), getTitle());
 		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
 			@Override
 			public void run() {
-				for (String s : plugin.getConfig().getConfigurationSection("island_menu.items").getKeys(false)) {
+				for (String s : plugin.getConfig().getConfigurationSection("menu.items").getKeys(false)) {
 					if (s == null)
 						continue;
-					s = "island_menu.items." + s;
-					if (s.equalsIgnoreCase("island_menu.items.skull")) {
+					s = "menu.items." + s;
+					if (s.equalsIgnoreCase("menu.items.skull")) {
 						ItemStack item = new ItemStack(Material.SKULL_ITEM, plugin.getConfig().getInt(s + ".amount"),
 								(byte) 3);
 						SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
@@ -153,11 +155,11 @@ public class IslandMenu {
 		this.inv = inv;
 	}
 
-	public Player getPlayer() {
+	public OfflinePlayer getPlayer() {
 		return player;
 	}
 
-	public void setPlayer(Player player) {
+	public void setPlayer(OfflinePlayer player) {
 		this.player = player;
 	}
 

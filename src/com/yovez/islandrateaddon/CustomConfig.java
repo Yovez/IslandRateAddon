@@ -1,4 +1,4 @@
-package com.yovez.islandrate;
+package com.yovez.islandrateaddon;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,10 +14,10 @@ public class CustomConfig {
 
 	private FileConfiguration customConfig;
 	private File customConfigFile;
-	private IslandRate plugin;
+	private IslandRateAddon plugin;
 	private String configName;
 
-	public CustomConfig(IslandRate plugin, String configName) {
+	public CustomConfig(IslandRateAddon plugin, String configName) {
 		this.plugin = plugin;
 		this.configName = configName;
 
