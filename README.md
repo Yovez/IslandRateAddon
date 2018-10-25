@@ -1,12 +1,8 @@
-# **Welcome to the IslandRate wiki!**
+# **IslandRateAddon**
 
-## [Download the Latest version of IslandRate on Spigot!](https://www.spigotmc.org/resources/islandrate-askyblock-addon.53519/)
+## **IslandRateAddon** is an addon for BentoBox that adds a useful and fun feature that allows players to rate each other's island.
 
 ### If you ever have questions, suggestions, or concerns relating to IslandRate, don't hesitate to send me a message on either [GitHub](https://github.com/Yovez) or [Spigot](https://www.spigotmc.org/members/yovez.527133)!
-
-***
-
-**Need help with the Configuration Settings/Option?** Visit the [IslandRate Spigot Page](https://www.spigotmc.org/resources/islandrate-askyblock-addon.53519/)!
 
 ***
 
