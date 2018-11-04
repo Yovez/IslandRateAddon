@@ -36,7 +36,7 @@ public class EventListener implements Listener {
 					e.getPlayer().sendMessage(addon.getMessage("no-permission", e.getPlayer(), null, 0, 0));
 					return;
 				}
-				if (addon.getAskyblock().getOwner(e.getBlock().getLocation()) == null) {
+				if (addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner() == null) {
 					e.setLine(1, addon.getMessage("sign.no-island-found.line-1", e.getPlayer(), null, 0, 0));
 					e.setLine(2, addon.getMessage("sign.no-island-found.line-2", e.getPlayer(), null, 0, 0));
 					e.setLine(3, addon.getMessage("sign.no-island-found.line-3", e.getPlayer(), null, 0, 0));
@@ -62,21 +62,27 @@ public class EventListener implements Listener {
 				e.setLine(2, addon.getMessage("sign.show-top-list.line-2", e.getPlayer(), null, 0, 0));
 				e.setLine(3, addon.getMessage("sign.show-top-list.line-3", e.getPlayer(), null, 0, 0));
 			} else if (e.getLine(1).isEmpty() && e.getLine(2).isEmpty() && e.getLine(3).isEmpty()) {
-				if (addon.getAskyblock().getOwner(e.getBlock().getLocation()) != null) {
+				if (addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner() != null) {
 					if (!e.getPlayer().hasPermission("islandrate.sign.create.rate")) {
 						e.getPlayer().sendMessage(addon.getMessage("no-permission", e.getPlayer(), null, 0, 0));
 						return;
 					}
-					if (addon.getAskyblock().getOwner(e.getBlock().getLocation()) == null) {
+					if (addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner() == null) {
 						e.getPlayer().sendMessage(addon.getMessage("other-error", e.getPlayer(), null, 0, 0));
 						return;
 					}
-					e.setLine(1, addon.getMessage("sign.rate-island.line-1", e.getPlayer(),
-							Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(e.getBlock().getLocation())), 0, 0));
-					e.setLine(2, addon.getMessage("sign.rate-island.line-2", e.getPlayer(),
-							Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(e.getBlock().getLocation())), 0, 0));
-					e.setLine(3, addon.getMessage("sign.rate-island.line-3", e.getPlayer(),
-							Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(e.getBlock().getLocation())), 0, 0));
+					e.setLine(1,
+							addon.getMessage("sign.rate-island.line-1", e.getPlayer(), Bukkit.getOfflinePlayer(
+									addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner()), 0,
+									0));
+					e.setLine(2,
+							addon.getMessage("sign.rate-island.line-2", e.getPlayer(), Bukkit.getOfflinePlayer(
+									addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner()), 0,
+									0));
+					e.setLine(3,
+							addon.getMessage("sign.rate-island.line-3", e.getPlayer(), Bukkit.getOfflinePlayer(
+									addon.getIslands().getIslandAt(e.getBlock().getLocation()).get().getOwner()), 0,
+									0));
 				} else {
 					e.setLine(1, addon.getMessage("sign.no-island-found.line-1", e.getPlayer(), null, 0, 0));
 					e.setLine(2, addon.getMessage("sign.no-island-found.line-2", e.getPlayer(), null, 0, 0));
@@ -89,7 +95,7 @@ public class EventListener implements Listener {
 	@EventHandler
 	public void onSignInteract(PlayerInteractEvent e) {
 		if (e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-			if (e.getClickedBlock().getType().equals(Material.SIGN_POST)
+			if (e.getClickedBlock().getType().equals(Material.SIGN)
 					|| e.getClickedBlock().getType().equals(Material.WALL_SIGN)) {
 				Sign sign = (Sign) e.getClickedBlock().getState();
 				if (sign.getLine(0).equals("§8[§aIslandRate§8]")) {
@@ -100,12 +106,12 @@ public class EventListener implements Listener {
 							return;
 						}
 						RateMenu menu = null;
-						if (addon.getAskyblock().getOwner(sign.getLocation()) == null) {
+						if (!addon.getIslands().getIslandAt(sign.getLocation()).isPresent()) {
 							e.getPlayer().sendMessage(addon.getMessage("no-island", e.getPlayer(), null, 0, 0));
 							return;
 						}
-						menu = new RateMenu(addon,
-								Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(sign.getLocation())));
+						menu = new RateMenu(addon, Bukkit
+								.getOfflinePlayer(addon.getIslands().getIslandAt(sign.getLocation()).get().getOwner()));
 						if (e.getPlayer().getUniqueId().toString()
 								.equalsIgnoreCase(menu.getPlayer().getUniqueId().toString())) {
 							e.getPlayer().sendMessage(addon.getMessage("owned-island", e.getPlayer(), null, 0, 0));
@@ -150,11 +156,11 @@ public class EventListener implements Listener {
 					}
 					if (sign.getLine(1)
 							.equals(addon.getMessage("sign.rate-island.line-1", e.getPlayer(), null, 0, 0))) {
-						if (addon.getAskyblock().getOwner(sign.getLocation()) != null) {
-							if (sign.getLine(2)
-									.equals(addon.getMessage("sign.rate-island.line-2", e.getPlayer(),
-											Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(sign.getLocation())),
-											0, 0))) {
+						if (addon.getIslands().getIslandAt(sign.getLocation()).isPresent()) {
+							if (sign.getLine(2).equals(addon.getMessage("sign.rate-island.line-2", e.getPlayer(),
+									Bukkit.getOfflinePlayer(
+											addon.getIslands().getIslandAt(sign.getLocation()).get().getOwner()),
+									0, 0))) {
 								if (sign.getLine(3).equals(
 										addon.getMessage("sign.rate-island.line-3", e.getPlayer(), null, 0, 0))) {
 									if (!e.getPlayer().hasPermission("islandrate.sign.use.rate")) {
@@ -162,8 +168,8 @@ public class EventListener implements Listener {
 												addon.getMessage("no-permission", e.getPlayer(), null, 0, 0));
 										return;
 									}
-									RateMenu menu = new RateMenu(addon,
-											Bukkit.getOfflinePlayer(addon.getAskyblock().getOwner(sign.getLocation())));
+									RateMenu menu = new RateMenu(addon, Bukkit.getOfflinePlayer(
+											addon.getIslands().getIslandAt(sign.getLocation()).get().getOwner()));
 									if (e.getPlayer().getUniqueId().toString()
 											.equalsIgnoreCase(menu.getPlayer().getUniqueId().toString())) {
 										e.getPlayer().sendMessage(
@@ -219,7 +225,7 @@ public class EventListener implements Listener {
 		if (addon.getIslands().getTeamLeader(addon.getSkyblockWorld(), p.getUniqueId()) == null) {
 			return;
 		}
-		Island island = addon.getAskyblock().getIslandOwnedBy(addon.getIslands().getOwner(p.getLocation()));
+		Island island = addon.getIslands().getIsland(addon.getSkyblockWorld(), p.getUniqueId());
 		OfflinePlayer op = Bukkit.getOfflinePlayer(island.getOwner());
 		RateMenu menu = new RateMenu(addon, op);
 		if (!e.getInventory().getTitle().equals(menu.getInv().getTitle())) {

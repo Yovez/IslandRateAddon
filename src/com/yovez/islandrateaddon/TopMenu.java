@@ -29,17 +29,13 @@ public class TopMenu {
 		return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("top_menu.title"));
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemStack getSkull(OfflinePlayer player, int place) {
 		if (player == null)
 			return null;
-		ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+		ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
 		SkullMeta meta = (SkullMeta) item.getItemMeta();
 		meta.setDisplayName(plugin.getMessage("top_menu.items.skull.display_name", null, player, 0, place));
-		if (!Bukkit.getVersion().contains("1.12"))
-			meta.setOwner(player.getName());
-		else
-			meta.setOwningPlayer(player);
+		meta.setOwningPlayer(player);
 		meta.setLore(plugin.getConvertedLore("top_menu.items.skull", player));
 		item.setItemMeta(meta);
 		if (!items.contains(item))
@@ -67,7 +63,7 @@ public class TopMenu {
 	public Inventory createInv() {
 		inv = Bukkit.createInventory(null, 27, getTitle());
 		int place[] = { 4, 12, 14, 19, 20, 21, 22, 23, 24, 25 };
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {

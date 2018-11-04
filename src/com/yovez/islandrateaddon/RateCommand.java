@@ -1,19 +1,20 @@
 package com.yovez.islandrateaddon;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import world.bentobox.bentobox.api.commands.CompositeCommand;
+import world.bentobox.bentobox.api.user.User;
 import world.bentobox.bentobox.database.objects.Island;
 
 public class RateCommand extends CompositeCommand {
 
-	final IslandRateAddon addon;
+	IslandRateAddon addon;
 	String prefix;
 	boolean menu;
 	boolean topMenu;
@@ -35,32 +36,32 @@ public class RateCommand extends CompositeCommand {
 	}
 
 	@Override
-	public boolean execute(CommandSender sender, String cmd, String[] args) {
+	public boolean execute(User sender, String cmd, List<String> args) {
 		if (cmd.equalsIgnoreCase("rate")) {
 			if (!(sender instanceof Player)) {
-				if (args.length == 0) {
+				if (args.size() == 0) {
 					sender.sendMessage("IslandRate console commands:");
-					sender.sendMessage(new String[] { "/rate reset <player|all>" });
+					sender.sendMessage("/rate reset <player|all>");
 					return true;
 				}
-				if (args.length == 1) {
-					if (args[0].equalsIgnoreCase("reset")) {
-						sender.sendMessage(new String[] { "Try /rate reset <player|all>" });
+				if (args.size() == 1) {
+					if (args.get(0).equalsIgnoreCase("reset")) {
+						sender.sendMessage("Try /rate reset <player|all>");
 						return true;
 					}
 					sender.sendMessage("IslandRate console commands:");
-					sender.sendMessage(new String[] { "/rate reset <player|all>" });
+					sender.sendMessage("/rate reset <player|all>");
 					return true;
 				}
-				if (args.length == 2) {
-					if (args[0].equalsIgnoreCase("reset")) {
-						if (args[1].equalsIgnoreCase("all")) {
+				if (args.size() == 2) {
+					if (args.get(0).equalsIgnoreCase("reset")) {
+						if (args.get(1).equalsIgnoreCase("all")) {
 							return true;
 						}
 						@SuppressWarnings("deprecation")
-						OfflinePlayer t = Bukkit.getOfflinePlayer(args[1]);
+						OfflinePlayer t = Bukkit.getOfflinePlayer(args.get(1));
 						if (t == null) {
-							sender.sendMessage(args[1] + " is not a valid player. Try /rate reset <player|all>");
+							sender.sendMessage(args.get(1) + " is not a valid player. Try /rate reset <player|all>");
 							return true;
 						}
 
@@ -87,17 +88,17 @@ public class RateCommand extends CompositeCommand {
 				p.sendMessage(noPermission);
 				return true;
 			}
-			if (args.length == 0) {
+			if (args.size() == 0) {
 				if (menu) {
 					if (!p.getLocation().getWorld().getName().equals(addon.getSkyblockWorld())) {
 						p.sendMessage(noIsland);
 						return true;
 					}
-					if (addon.getAskyblock().getOwner(p.getLocation()) == null) {
+					if (!addon.getIslands().getIslandAt(p.getLocation()).isPresent()) {
 						p.sendMessage(noIsland);
 						return true;
 					}
-					if (addon.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
+					if (addon.getIslands().getIslandAt(p.getLocation()).get().getOwner().equals(p.getUniqueId())) {
 						if (addon.getConfig().getBoolean("island_menu.enabled", false) == true) {
 							IslandMenu im = new IslandMenu(addon, p);
 							im.openInv();
@@ -107,7 +108,7 @@ public class RateCommand extends CompositeCommand {
 						return true;
 					}
 					RateMenu rm = new RateMenu(addon,
-							Bukkit.getOfflinePlayer(addon.getAskyblock().getIslandAt(p.getLocation()).getOwner()));
+							Bukkit.getOfflinePlayer(addon.getIslands().getIslandAt(p.getLocation()).get().getOwner()));
 					if (addon.getConfig().getBoolean("menu.custom", false) == false)
 						rm.openInv(p);
 					else
@@ -117,8 +118,8 @@ public class RateCommand extends CompositeCommand {
 				p.sendMessage(commandUsage);
 				return true;
 			}
-			if (args.length == 1) {
-				if (args[0].equalsIgnoreCase("invcheck")) {
+			if (args.size() == 1) {
+				if (args.get(0).equalsIgnoreCase("invcheck")) {
 					if (!p.hasPermission("islandrate.invcheck")) {
 						p.sendMessage(noPermission);
 						return true;
@@ -129,7 +130,7 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage("§bNumber of Items removed: §e" + ic.runCheck().values().size());
 					return true;
 				}
-				if (args[0].equalsIgnoreCase("average")) {
+				if (args.get(0).equalsIgnoreCase("average")) {
 					if (!p.hasPermission("islandrate.average")) {
 						p.sendMessage(noPermission);
 						return true;
@@ -137,7 +138,7 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage(getMessage("average-rating", p, null, 0, 0));
 					return true;
 				}
-				if (args[0].equalsIgnoreCase("total")) {
+				if (args.get(0).equalsIgnoreCase("total")) {
 					if (!p.hasPermission("islandrate.total")) {
 						p.sendMessage(noPermission);
 						return true;
@@ -145,7 +146,7 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage(getMessage("total-ratings", p, null, 0, 0));
 					return true;
 				}
-				if (args[0].equalsIgnoreCase("migrate")) {
+				if (args.get(0).equalsIgnoreCase("migrate")) {
 					if (!p.hasPermission("islandrate.migrate")) {
 						p.setDisplayName(noPermission);
 						return true;
@@ -160,12 +161,11 @@ public class RateCommand extends CompositeCommand {
 					}
 					return true;
 				}
-				if (args[0].equalsIgnoreCase("reload")) {
+				if (args.get(0).equalsIgnoreCase("reload")) {
 					if (!p.hasPermission("islandrate.reload")) {
 						p.sendMessage(noPermission);
 						return true;
 					}
-					addon.reloadConfig();
 					addon.getMessages().reloadConfig();
 					addon.getOptOut().reloadConfig();
 					setupPrefix();
@@ -194,7 +194,7 @@ public class RateCommand extends CompositeCommand {
 				 * return true; } InfiniteTopMenu itm = new InfiniteTopMenu(addon);
 				 * itm.openInv(p); return true; }
 				 */
-				if (args[0].equalsIgnoreCase("top")) {
+				if (args.get(0).equalsIgnoreCase("top")) {
 					if (!p.hasPermission("islandrate.top")) {
 						p.sendMessage(noPermission);
 						return true;
@@ -222,45 +222,45 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage(commandDisabled);
 					return true;
 				}
-				if (addon.getIslands().userIsOnIsland(addon.getSkyblockWorld(), p.getUniqueId())) {
+				if (addon.getIslands().userIsOnIsland(addon.getSkyblockWorld(), (User) p)) {
 					p.sendMessage(noIsland);
 					return true;
 				}
-				if (addon.getIslands().hasIsland(getWorld(), uuid) == null) {
+				if (!addon.getIslands().hasIsland(getWorld(), p.getUniqueId())) {
 					p.sendMessage(noIsland);
 					return true;
 				}
-				if (addon.getAskyblock().getIslandAt(p.getLocation()).getOwner().equals(p.getUniqueId())) {
+				if (addon.getIslands().getIslandAt(p.getLocation()).get().getOwner().equals(p.getUniqueId())) {
 					p.sendMessage(ownedIsland);
 					return true;
 				}
-				Island island = addon.getAskyblock().getIslandAt(p.getLocation());
+				Island island = addon.getIslands().getIslandAt(p.getLocation()).get();
 				if (island == null) {
 					p.sendMessage(noIsland);
 					return true;
 				}
-				if (island.getMembers().contains(p.getUniqueId())) {
+				if (island.getMembers().containsKey(p.getUniqueId())) {
 					p.sendMessage(teamIsland);
 					return true;
 				}
-				if (!addon.getAPI().isInt(args[0])) {
+				if (!addon.getAPI().isInt(args.get(0))) {
 					p.sendMessage(numberNotFound);
 					return true;
 				}
-				if (Integer.parseInt(args[0]) <= 0
-						|| Integer.parseInt(args[0]) > addon.getConfig().getInt("max-command-rating", 5)) {
+				if (Integer.parseInt(args.get(0)) <= 0
+						|| Integer.parseInt(args.get(0)) > addon.getConfig().getInt("max-command-rating", 5)) {
 					p.sendMessage(commandUsage);
 					return true;
 				}
-				addon.rateIsland(p, Bukkit.getOfflinePlayer(island.getOwner()), Integer.parseInt(args[0]));
-			} else if (args.length == 2) {
-				if (args[0].equalsIgnoreCase("average")) {
+				addon.rateIsland(p, Bukkit.getOfflinePlayer(island.getOwner()), Integer.parseInt(args.get(0)));
+			} else if (args.size() == 2) {
+				if (args.get(1).equalsIgnoreCase("average")) {
 					if (!p.hasPermission("islandrate.average")) {
 						p.sendMessage(noPermission);
 						return true;
 					}
 					@SuppressWarnings("deprecation")
-					OfflinePlayer t = Bukkit.getServer().getOfflinePlayer(args[1]);
+					OfflinePlayer t = Bukkit.getServer().getOfflinePlayer(args.get(1));
 					if (t == null) {
 						p.sendMessage(getMessage("average-player-not-found", p, null, 0, 0));
 						return true;
@@ -268,13 +268,13 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage(getMessage("average-rating-target", p, t, 0, 0));
 					return true;
 				}
-				if (args[0].equalsIgnoreCase("total")) {
+				if (args.get(1).equalsIgnoreCase("total")) {
 					if (!p.hasPermission("islandrate.total.other")) {
 						p.sendMessage(noPermission);
 						return true;
 					}
 					@SuppressWarnings("deprecation")
-					OfflinePlayer t = Bukkit.getServer().getOfflinePlayer(args[1]);
+					OfflinePlayer t = Bukkit.getServer().getOfflinePlayer(args.get(1));
 					if (t == null) {
 						p.sendMessage(getMessage("total-player-not-found", p, null, 0, 0));
 						return true;

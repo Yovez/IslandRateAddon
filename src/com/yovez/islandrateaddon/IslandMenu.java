@@ -36,15 +36,11 @@ public class IslandMenu {
 		return ChatColor.translateAlternateColorCodes('&', plugin.getMessage("island_menu.title", player, null, 0, 0));
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemStack getSkull() {
-		ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+		ItemStack item = new ItemStack(Material.PLAYER_HEAD);
 		SkullMeta meta = (SkullMeta) item.getItemMeta();
 		meta.setDisplayName("§r§f" + player.getName());
-		if (Bukkit.getVersion().contains("1.7") || Bukkit.getVersion().contains("1.8"))
-			meta.setOwner(player.getName());
-		else
-			meta.setOwningPlayer(player);
+		meta.setOwningPlayer(player);
 		meta.setLore(Arrays.asList("§6Total Ratings: §e" + plugin.getAPI().getTotalRatings(player)));
 		item.setItemMeta(meta);
 		if (!items.containsKey(item))
@@ -95,7 +91,7 @@ public class IslandMenu {
 	}
 
 	public Inventory createInv() {
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -110,10 +106,9 @@ public class IslandMenu {
 		return inv;
 	}
 
-	@SuppressWarnings("deprecation")
 	public Inventory createCustomInv() {
 		inv = Bukkit.createInventory(player, plugin.getConfig().getInt("island_menu.size", 9), getTitle());
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
@@ -122,14 +117,10 @@ public class IslandMenu {
 						continue;
 					s = "island_menu.items." + s;
 					if (s.equalsIgnoreCase("island_menu.items.skull")) {
-						ItemStack item = new ItemStack(Material.SKULL_ITEM, plugin.getConfig().getInt(s + ".amount"),
-								(byte) 3);
+						ItemStack item = new ItemStack(Material.PLAYER_HEAD, plugin.getConfig().getInt(s + ".amount"));
 						SkullMeta skullMeta = (SkullMeta) item.getItemMeta();
 						skullMeta.setDisplayName(plugin.getMessage(s + ".display_name", null, player, 0, 0));
-						if (!Bukkit.getVersion().contains("1.12"))
-							skullMeta.setOwner(player.getName());
-						else
-							skullMeta.setOwningPlayer(player);
+						skullMeta.setOwningPlayer(player);
 						skullMeta.setLore(plugin.getConvertedLore(s, player));
 						item.setItemMeta(skullMeta);
 						inv.setItem(plugin.getConfig().getInt(s + ".slot"), item);

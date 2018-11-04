@@ -22,7 +22,7 @@ public class MySQL {
 
 	public static MySQL getInstance() {
 		if (instance == null)
-			new MySQL(IslandRateAddon.getPlugin());
+			new MySQL(IslandRateAddon.getAddon());
 		return instance;
 	}
 

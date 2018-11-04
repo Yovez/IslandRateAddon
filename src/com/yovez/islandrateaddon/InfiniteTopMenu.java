@@ -30,19 +30,15 @@ public class InfiniteTopMenu {
 		return ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("infinite_top_menu.title"));
 	}
 
-	@SuppressWarnings("deprecation")
 	public ItemStack getSkull(OfflinePlayer player, int place) {
 		if (player == null)
 			return null;
 		if (place == 0)
 			return null;
-		ItemStack item = new ItemStack(Material.SKULL_ITEM, 1, (byte) 3);
+		ItemStack item = new ItemStack(Material.PLAYER_HEAD, 1);
 		SkullMeta meta = (SkullMeta) item.getItemMeta();
 		meta.setDisplayName(plugin.getMessage("infinite_top_menu.items.skull.display_name", null, player, 0, place));
-		if (!Bukkit.getVersion().contains("1.12"))
-			meta.setOwner(player.getName());
-		else
-			meta.setOwningPlayer(player);
+		meta.setOwningPlayer(player);
 		meta.setLore(plugin.getConvertedLore("infinite_top_menu.items.skull", player));
 		item.setItemMeta(meta);
 		if (!items.contains(item))
@@ -65,11 +61,11 @@ public class InfiniteTopMenu {
 	public Inventory createInv() {
 		inv = Bukkit.createInventory(null, 54, getTitle());
 
-		Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+		Bukkit.getScheduler().runTaskAsynchronously(plugin.getPlugin(), new Runnable() {
 
 			@Override
 			public void run() {
-				ItemStack pane = new ItemStack(Material.STAINED_GLASS_PANE, 1, (short) 7);
+				ItemStack pane = new ItemStack(Material.GRAY_STAINED_GLASS_PANE, 1);
 				ItemMeta paneM = pane.getItemMeta();
 				paneM.setDisplayName(" ");
 				pane.setItemMeta(paneM);
