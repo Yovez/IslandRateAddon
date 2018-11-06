@@ -22,6 +22,7 @@ public class RateCommand extends CompositeCommand {
 
 	public RateCommand(IslandRateAddon addon) {
 		super(addon, "rate");
+		this.addon = addon;
 	}
 
 	private void setupPrefix() {
@@ -32,13 +33,19 @@ public class RateCommand extends CompositeCommand {
 	}
 
 	private String getMessage(String path, Player p, OfflinePlayer t, int rating, int topPlace) {
-		return addon.getMessage(path, p, t, rating, topPlace);
+		if (addon.getMessage(path, p, t, rating, topPlace) == null)
+			return "";
+		else
+			return addon.getMessage(path, p, t, rating, topPlace);
 	}
 
 	@Override
 	public boolean execute(User sender, String cmd, List<String> args) {
+		if (sender == null) {
+			return false;
+		}
 		if (cmd.equalsIgnoreCase("rate")) {
-			if (!(sender instanceof Player)) {
+			if (!(sender.isPlayer())) {
 				if (args.size() == 0) {
 					sender.sendMessage("IslandRate console commands:");
 					sender.sendMessage("/rate reset <player|all>");
@@ -69,7 +76,11 @@ public class RateCommand extends CompositeCommand {
 				}
 				return true;
 			}
-			Player p = (Player) sender;
+			Player p = null;
+			if (sender.isPlayer())
+				p = sender.getPlayer();
+			if (p == null)
+				return false;
 			String commandUsage = getMessage("command-usage", p, null, 0, 0);
 			String noPermission = getMessage("no-permission", p, null, 0, 0);
 			String noIsland = getMessage("no-island", p, null, 0, 0);
@@ -90,7 +101,7 @@ public class RateCommand extends CompositeCommand {
 			}
 			if (args.size() == 0) {
 				if (menu) {
-					if (!p.getLocation().getWorld().getName().equals(addon.getSkyblockWorld())) {
+					if (!p.getLocation().getWorld().getName().equals(getWorld().getName())) {
 						p.sendMessage(noIsland);
 						return true;
 					}
@@ -222,7 +233,7 @@ public class RateCommand extends CompositeCommand {
 					p.sendMessage(commandDisabled);
 					return true;
 				}
-				if (addon.getIslands().userIsOnIsland(addon.getSkyblockWorld(), (User) p)) {
+				if (addon.getIslands().userIsOnIsland(getWorld(), (User) p)) {
 					p.sendMessage(noIsland);
 					return true;
 				}
@@ -323,8 +334,8 @@ public class RateCommand extends CompositeCommand {
 
 	@Override
 	public void setup() {
-		// TODO Auto-generated method stub
-
+		setWorld(addon.getServer().getWorld(
+				addon.getAddonByName("BSkyBlock").get().getConfig().getString("world.world-name", "BSkyBlock_world")));
 	}
 
 }

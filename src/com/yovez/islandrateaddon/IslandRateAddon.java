@@ -16,14 +16,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import world.bentobox.bentobox.api.addons.Addon;
 import world.bentobox.bentobox.database.objects.Island;
-import world.bentobox.bskyblock.BSkyBlock;
 
 public class IslandRateAddon extends Addon {
 
@@ -31,11 +29,11 @@ public class IslandRateAddon extends Addon {
 	private IslandRateAPI api;
 	private Map<UUID, Long> cooldown;
 	private CustomConfig messages, optOut;
-	private World skyblockWorld;
 	public static IslandRateAddon addon;
+	private RateCommand rateCmd;
 
 	@Override
-	public void onEnable() {
+	public void onLoad() {
 		addon = this;
 		saveDefaultConfig();
 		messages = new CustomConfig(this, "messages");
@@ -44,8 +42,6 @@ public class IslandRateAddon extends Addon {
 		optOut.saveDefaultConfig();
 		api = IslandRateAPI.getInstance();
 		mysql = MySQL.getInstance();
-		setSkyblockWorld(getServer().getWorld(BSkyBlock.getInstance().getConfig().getString("world-name")));
-		new RateCommand(this);
 		if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI")) {
 			new Placeholders(this);
 		}
@@ -56,6 +52,11 @@ public class IslandRateAddon extends Addon {
 		if (getConfig().getBoolean("inv_check.enabled", false) == true)
 			Bukkit.getScheduler().scheduleSyncRepeatingTask(getPlugin(), new InventoryCheck(this), 0L,
 					getConfig().getLong("inv_check.timer") * 1000);
+	}
+
+	@Override
+	public void onEnable() {
+		rateCmd = new RateCommand(this);
 	}
 
 	public static IslandRateAddon getAddon() {
@@ -80,6 +81,8 @@ public class IslandRateAddon extends Addon {
 			msg = getConfig().getString(msg);
 		else if (messages.getConfig().getString(msg) != null)
 			msg = messages.getConfig().getString(msg);
+		if (msg == null || msg.isEmpty())
+			return "";
 		msg = msg.replaceAll("%prefix%", messages.getConfig().getString("prefix"));
 		if (p != null) {
 			if (msg.contains("%player%"))
@@ -125,7 +128,7 @@ public class IslandRateAddon extends Addon {
 		if (!getConfig().contains(path))
 			return null;
 		ItemStack item = new ItemStack(Material.matchMaterial(getConfig().getString(path + ".material").toUpperCase()),
-				getConfig().getInt(path + ".amount", 1), (short) getConfig().getInt(path + ".durability", 0));
+				getConfig().getInt(path + ".amount", 1));
 		ItemMeta meta = item.getItemMeta();
 		meta.setDisplayName(getMessage(path + ".display_name", null, op, 0, 0));
 		meta.setLore(getConvertedLore(path, op));
@@ -180,7 +183,7 @@ public class IslandRateAddon extends Addon {
 		 * 
 		 * } }
 		 */
-		Island island = getIslands().getIsland(skyblockWorld, op.getUniqueId());
+		Island island = getIslands().getIsland(rateCmd.getWorld(), p.getUniqueId());
 		if (island == null) {
 			p.sendMessage(getMessage("no-island", p, null, 0, 0));
 			p.playSound(p.getLocation(),
@@ -342,11 +345,7 @@ public class IslandRateAddon extends Addon {
 		return optOut;
 	}
 
-	public World getSkyblockWorld() {
-		return skyblockWorld;
-	}
-
-	public void setSkyblockWorld(World skyblockWorld) {
-		this.skyblockWorld = skyblockWorld;
+	public RateCommand getRateCommand() {
+		return rateCmd;
 	}
 }

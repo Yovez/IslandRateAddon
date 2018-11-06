@@ -35,9 +35,13 @@ public class CustomConfig {
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
-		if (defConfigStream != null) {
-			YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
-			customConfig.setDefaults(defConfig);
+		try {
+			if (defConfigStream != null && defConfigStream.ready()) {
+				YamlConfiguration defConfig = YamlConfiguration.loadConfiguration(defConfigStream);
+				customConfig.setDefaults(defConfig);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 

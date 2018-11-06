@@ -222,10 +222,10 @@ public class EventListener implements Listener {
 		if (e.getClickedInventory().getType().equals(InventoryType.CREATIVE))
 			return;
 		Player p = (Player) e.getWhoClicked();
-		if (addon.getIslands().getTeamLeader(addon.getSkyblockWorld(), p.getUniqueId()) == null) {
+		if (addon.getIslands().getTeamLeader(addon.getRateCommand().getWorld(), p.getUniqueId()) == null) {
 			return;
 		}
-		Island island = addon.getIslands().getIsland(addon.getSkyblockWorld(), p.getUniqueId());
+		Island island = addon.getIslands().getIsland(addon.getRateCommand().getWorld(), p.getUniqueId());
 		OfflinePlayer op = Bukkit.getOfflinePlayer(island.getOwner());
 		RateMenu menu = new RateMenu(addon, op);
 		if (!e.getInventory().getTitle().equals(menu.getInv().getTitle())) {
@@ -277,10 +277,12 @@ public class EventListener implements Listener {
 			Location loc;
 			if (!Bukkit.getVersion().contains("1.12")) {
 				loc = addon.getIslands()
-						.getIsland(addon.getSkyblockWorld(), Bukkit.getOfflinePlayer(meta.getOwner()).getUniqueId())
+						.getIsland(addon.getRateCommand().getWorld(),
+								Bukkit.getOfflinePlayer(meta.getOwner()).getUniqueId())
 						.getSpawnPoint(Environment.NORMAL);
 			} else
-				loc = addon.getIslands().getIsland(addon.getSkyblockWorld(), meta.getOwningPlayer().getUniqueId())
+				loc = addon.getIslands()
+						.getIsland(addon.getRateCommand().getWorld(), meta.getOwningPlayer().getUniqueId())
 						.getSpawnPoint(Environment.NORMAL);
 			if (loc != null) {
 				e.getWhoClicked().teleport(loc);
@@ -355,10 +357,12 @@ public class EventListener implements Listener {
 			Location loc;
 			if (!Bukkit.getVersion().contains("1.12")) {
 				loc = addon.getIslands()
-						.getIsland(addon.getSkyblockWorld(), Bukkit.getOfflinePlayer(meta.getOwner()).getUniqueId())
+						.getIsland(addon.getRateCommand().getWorld(),
+								Bukkit.getOfflinePlayer(meta.getOwner()).getUniqueId())
 						.getSpawnPoint(Environment.NORMAL);
 			} else
-				loc = addon.getIslands().getIsland(addon.getSkyblockWorld(), meta.getOwningPlayer().getUniqueId())
+				loc = addon.getIslands()
+						.getIsland(addon.getRateCommand().getWorld(), meta.getOwningPlayer().getUniqueId())
 						.getSpawnPoint(Environment.NORMAL);
 			if (loc != null) {
 				e.getWhoClicked().teleport(loc);
