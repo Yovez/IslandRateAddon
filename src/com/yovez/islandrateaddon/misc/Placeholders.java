@@ -1,61 +1,90 @@
 package com.yovez.islandrateaddon.misc;
 
-import org.bukkit.entity.Player;
-
 import com.yovez.islandrateaddon.IslandRateAddon;
-import com.yovez.islandrateaddon.api.IslandRateAPI;
 
-import me.clip.placeholderapi.PlaceholderAPI;
-import me.clip.placeholderapi.PlaceholderHook;
+import world.bentobox.bentobox.api.placeholders.PlaceholderReplacer;
+import world.bentobox.bentobox.api.user.User;
 
-public class Placeholders extends PlaceholderHook {
+public class Placeholders {
 
 	IslandRateAddon plugin;
 
 	public Placeholders(IslandRateAddon plugin) {
 		this.plugin = plugin;
-		if (plugin.getConfig().getBoolean("placeholderapi_shortened", false) == true)
-			PlaceholderAPI.registerPlaceholderHook("ir", this);
-		else
-			PlaceholderAPI.registerPlaceholderHook("islandrate", this);
-	}
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_top_player",
+				new PlaceholderReplacer() {
 
-	@Override
-	public String onPlaceholderRequest(Player p, String label) {
-		IslandRateAPI api = IslandRateAPI.getInstance();
-		if (label.equalsIgnoreCase("top_rated_player")) {
-			if (api.getTopRated() == null) {
-				return "No top player found";
-			}
-			return api.getTopRated().getName();
-		}
-		if (label.startsWith("top_rated_player_"))
-			if (api.isInt(String.valueOf(label.charAt(label.length() - 1)))) {
-				int num = Character.getNumericValue(label.charAt(label.length() - 1));
-				return String.valueOf(api.getTopRated(num).getName());
-			}
-		if (label.startsWith("top_rated_amount_"))
-			if (api.isInt(String.valueOf(label.charAt(label.length() - 1)))) {
-				int num = Character.getNumericValue(label.charAt(label.length() - 1));
-				return String.valueOf(api.getTotalRatings(api.getTopRated(num)));
-			}
-		if (label.equalsIgnoreCase("total_voters"))
-			return String.valueOf(api.getTotalNumOfRaters(p));
-		if (label.equalsIgnoreCase("top_rated_amount"))
-			return String.valueOf(api.getTotalRatings(api.getTopRated()));
-		if (label.startsWith("top_rated_amount_"))
-			if (api.isInt(String.valueOf(label.charAt(label.length())))) {
-				if ((int) label.charAt(label.length()) == 0)
-					return String.valueOf(api.getTopRated(10));
-				return String.valueOf(api.getTopRated(label.charAt(label.length())));
-			}
-		if (label.equalsIgnoreCase("average_rating"))
-			return String.valueOf(api.getAverageRating(p));
-		if (label.equalsIgnoreCase("total_ratings_server"))
-			return String.valueOf(api.getTotalRatings());
-		if (label.equalsIgnoreCase("total_ratings_player"))
-			return String.valueOf(api.getTotalRatings(p));
-		return null;
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							if (plugin.getAPI().getTopRated() == null)
+								return "No top rated player found";
+							return plugin.getAPI().getTopRated().getName();
+						}
+						return null;
+					}
+
+				});
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_top_amount",
+				new PlaceholderReplacer() {
+
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							return String.valueOf(plugin.getAPI().getTotalRatings(plugin.getAPI().getTopRated()));
+						}
+						return null;
+					}
+
+				});
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_total_voters",
+				new PlaceholderReplacer() {
+
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							return String.valueOf(plugin.getAPI().getTotalNumOfRaters(arg0.getPlayer()));
+						}
+						return null;
+					}
+
+				});
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_average",
+				new PlaceholderReplacer() {
+
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							return String.valueOf(plugin.getAPI().getAverageRating(arg0.getPlayer()));
+						}
+						return null;
+					}
+
+				});
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_total_ratings",
+				new PlaceholderReplacer() {
+
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							return String.valueOf(plugin.getAPI().getTotalRatings());
+						}
+						return null;
+					}
+
+				});
+		plugin.getPlugin().getPlaceholdersManager().registerPlaceholder(plugin, "rate_total_ratings_player",
+				new PlaceholderReplacer() {
+
+					@Override
+					public String onReplace(User arg0) {
+						if (arg0 != null) {
+							return String.valueOf(plugin.getAPI().getTotalRatings(arg0.getPlayer()));
+						}
+						return null;
+					}
+
+				});
 	}
 
 }
