@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.util;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

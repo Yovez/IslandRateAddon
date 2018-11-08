@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.config;
 
 import java.io.File;
 

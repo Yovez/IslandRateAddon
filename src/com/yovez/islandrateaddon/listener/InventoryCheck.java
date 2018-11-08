@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.listener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+
+import com.yovez.islandrateaddon.IslandRateAddon;
+import com.yovez.islandrateaddon.gui.RateMenu;
 
 public class InventoryCheck implements Runnable {
 

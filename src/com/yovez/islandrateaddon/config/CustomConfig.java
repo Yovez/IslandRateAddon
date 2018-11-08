@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.config;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.util.logging.Level;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+
+import com.yovez.islandrateaddon.IslandRateAddon;
 
 public class CustomConfig {
 

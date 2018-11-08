@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.util;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -6,11 +6,11 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.file.FileConfiguration;
+
+import com.yovez.islandrateaddon.IslandRateAddon;
 
 public class MySQL {
 
@@ -53,31 +53,6 @@ public class MySQL {
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
-			}
-		}
-	}
-
-	public void convertFromFile() throws SQLException, ClassNotFoundException {
-		Connection conn = getConnection();
-		for (OfflinePlayer op : Bukkit.getServer().getOfflinePlayers()) {
-			YovezConfig c = new YovezConfig(op.getUniqueId().toString());
-			for (String key : c.getConfig().getKeys(false)) {
-				int rating = c.getConfig().getInt(key);
-				OfflinePlayer v = Bukkit.getOfflinePlayer(UUID.fromString(key));
-				PreparedStatement ps = conn
-						.prepareStatement("REPLACE INTO island_owners(player_uuid, total_ratings) VALUES (?,?);");
-				ps.setString(1, op.getUniqueId().toString());
-				ps.setInt(2, IslandRateAPI.getInstance().getTotalRatings(op) + rating);
-				PreparedStatement psr = conn.prepareStatement(
-						"REPLACE INTO island_ratings(rater_uuid, player_uuid, rating) VALUES (?,?,?);");
-				psr.setString(1, v.getUniqueId().toString());
-				psr.setString(2, op.getUniqueId().toString());
-				psr.setInt(3, rating);
-				ps.executeUpdate();
-				psr.executeUpdate();
-				ps.close();
-				psr.close();
-				connection.close();
 			}
 		}
 	}

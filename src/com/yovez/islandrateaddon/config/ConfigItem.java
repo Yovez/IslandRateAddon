@@ -1,10 +1,12 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.config;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.inventory.ItemStack;
+
+import com.yovez.islandrateaddon.IslandRateAddon;
 
 public class ConfigItem {
 

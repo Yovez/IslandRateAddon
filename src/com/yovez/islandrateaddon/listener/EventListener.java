@@ -1,4 +1,4 @@
-package com.yovez.islandrateaddon;
+package com.yovez.islandrateaddon.listener;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -16,6 +16,13 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
+
+import com.yovez.islandrateaddon.IslandRateAddon;
+import com.yovez.islandrateaddon.config.ConfigItem;
+import com.yovez.islandrateaddon.gui.InfiniteTopMenu;
+import com.yovez.islandrateaddon.gui.IslandMenu;
+import com.yovez.islandrateaddon.gui.RateMenu;
+import com.yovez.islandrateaddon.gui.TopMenu;
 
 import world.bentobox.bentobox.database.objects.Island;
 
